@@ -11,16 +11,22 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, value } = body;
+    const { roomName, roomValue, bathroomName, bathroomValue } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+    if (!roomName) {
+      return new NextResponse("Room Name is required", { status: 400 });
     }
-    if (!value) {
-      return new NextResponse("Value is required", { status: 400 });
+    if (!roomValue) {
+      return new NextResponse("Room Value is required", { status: 400 });
+    }
+    if (!bathroomName) {
+      return new NextResponse("Bathroom Name is required", { status: 400 });
+    }
+    if (!bathroomValue) {
+      return new NextResponse("Bathroom Value is required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -38,16 +44,18 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const color = await prismadb.color.create({
+    const amenities = await prismadb.amenities.create({
       data: {
-        name,
-        value,
+        roomName,
+        roomValue,
+        bathroomName,
+        bathroomValue,
         storeId: params.storeId,
       },
     });
-    return NextResponse.json(color);
+    return NextResponse.json(amenities);
   } catch (error) {
-    console.log("[COLORS_POST]", error);
+    console.log("[AMENITIES_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -60,14 +68,14 @@ export async function GET(
       return new NextResponse("Store id is required", { status: 400 });
     }
 
-    const colors = await prismadb.color.findMany({
+    const amenities = await prismadb.amenities.findMany({
       where: {
         storeId: params.storeId,
       },
     });
-    return NextResponse.json(colors);
+    return NextResponse.json(amenities);
   } catch (error) {
-    console.log("[COLORS_GET]", error);
+    console.log("[AMENITIES_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

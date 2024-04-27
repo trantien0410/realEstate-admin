@@ -33,9 +33,9 @@ export function MainNav({
       active: pathname === `/${params.storeId}/sizes`,
     },
     {
-      href: `/${params.storeId}/colors`,
-      label: "Màu Sắc",
-      active: pathname === `/${params.storeId}/colors`,
+      href: `/${params.storeId}/amenities`,
+      label: "Tiện Nghi",
+      active: pathname === `/${params.storeId}/amenities`,
     },
     {
       href: `/${params.storeId}/products`,

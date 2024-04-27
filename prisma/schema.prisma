@@ -18,7 +18,7 @@ model Store {
   billboards Billboard[] @relation("StoreToBillboard")
   categories Category[]  @relation("StoreToCategory")
   sizes      Size[]      @relation("StoreToSize")
-  colors     Color[]     @relation("StoreToColor")
+  amenities  Amenities[] @relation("StoreToAmenities")
   products   Product[]   @relation("StoreToProduct")
   createdAt  DateTime    @default(now())
   updateAt   DateTime    @updatedAt
@@ -66,37 +66,39 @@ model Size {
   @@index([storeId])
 }
 
-model Color {
-  id        String    @id @default(uuid())
-  storeId   String
-  stores    Store     @relation("StoreToColor", fields: [storeId], references: [id])
-  name      String
-  value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updateAt  DateTime  @updatedAt
+model Amenities {
+  id            String    @id @default(uuid())
+  storeId       String
+  stores        Store     @relation("StoreToAmenities", fields: [storeId], references: [id])
+  roomName      String
+  roomValue     Int
+  bathroomName  String
+  bathroomValue Int
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updateAt      DateTime  @updatedAt
 
   @@index([storeId])
 }
 
 model Product {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   storeId    String
-  stores     Store    @relation("StoreToProduct", fields: [storeId], references: [id])
+  stores     Store     @relation("StoreToProduct", fields: [storeId], references: [id])
   categoryId String
-  category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  category   Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
   name       String
   price      Decimal
-  isFeatured Boolean  @default(false)
-  isArchived Boolean  @default(false)
+  isFeatured Boolean   @default(false)
+  isArchived Boolean   @default(false)
   sizeId     String
-  size       Size     @relation(fields: [sizeId], references: [id])
+  size       Size      @relation(fields: [sizeId], references: [id])
   colorId    String
-  color      Color    @relation(fields: [colorId], references: [id])
+  amenities  Amenities @relation(fields: [colorId], references: [id])
   images     Image[]
   videos     Video[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([storeId])
   @@index([categoryId])

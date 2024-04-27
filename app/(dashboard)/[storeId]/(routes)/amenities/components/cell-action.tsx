@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ColorColumn } from "./columns";
+import { AmenitiesColumn } from "./columns";
 import { Button } from "@/components/ui/button";
 import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import toast from "react-hot-toast";
@@ -17,7 +17,7 @@ import axios from "axios";
 import { AlertModal } from "@/components/modals/alert-modal";
 
 interface CellActionProps {
-  data: ColorColumn;
+  data: AmenitiesColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -29,18 +29,20 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("Color Id copied to the clipboard.");
+    toast.success("Id tiện nghi đã sao chép vào bảng nhớ tạm.");
   };
 
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/colors/${data.id}`);
+      await axios.delete(`/api/${params.storeId}/amenities/${data.id}`);
       router.refresh();
-      router.push(`/${params.storeId}/colors`);
-      toast.success("Color deleted.");
+      router.push(`/${params.storeId}/amenities`);
+      toast.success("Tiện ích đã bị xóa.");
     } catch (error: any) {
-      toast.error("Make sure you removed all products using this color first.");
+      toast.error(
+        "Trước tiên, hãy đảm bảo bạn đã xóa tất cả các sản phẩm sử dụng tiện ích này."
+      );
     } finally {
       setLoading(false);
       setOpen(false);
@@ -57,25 +59,27 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open Menu</span>
+            <span className="sr-only">Mở Menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => onCopy(data.id)}>
             <Copy className="mr-2 h-4 w-4" />
             Copy Id
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`/${params.storeId}/colors/${data.id}`)}
+            onClick={() =>
+              router.push(`/${params.storeId}/amenities/${data.id}`)
+            }
           >
             <Edit className="mr-2 h-4 w-4" />
-            Update
+            Cập Nhật
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" />
-            Delete
+            Xóa
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
