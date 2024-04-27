@@ -7,7 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { Trash } from "lucide-react";
-import { Category, Color, Image, Product, Size } from "@prisma/client";
+import {
+  Amenities,
+  Category,
+  Image,
+  Product,
+  Size,
+  Video,
+} from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -33,13 +40,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import VideoUpload from "@/components/ui/video-upload";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   name: z.string().min(1),
+  description: z.string().min(1),
   images: z.object({ url: z.string() }).array(),
+  videos: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
-  colorId: z.string().min(1),
+  amenitiesId: z.string().min(1),
   sizeId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
@@ -51,10 +62,11 @@ interface ProductFormProps {
   initialData:
     | (Product & {
         images: Image[];
+        videos: Video[];
       })
     | null;
   categories: Category[];
-  colors: Color[];
+  amenities: Amenities[];
   sizes: Size[];
 }
 
@@ -62,7 +74,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories,
   sizes,
-  colors,
+  amenities,
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -70,10 +82,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Edit product" : "Create product";
-  const description = initialData ? "Edit a product." : "Add a new product";
-  const toastMessage = initialData ? "Product updated." : "Product created.";
-  const action = initialData ? "Save changes" : "Create";
+  const title = initialData ? "Sửa Sản Phẩm" : "Tạo Mới Sản Phẩm";
+  const description = initialData ? "Sửa 1 Sản Phẩm" : "Tạo Mới 1 Sản Phẩm";
+  const toastMessage = initialData
+    ? "Sản Phẩm đã được cập nhật."
+    : "Sản Phẩm mới đã tạo thành công.";
+  const action = initialData ? "Lưu" : "Tạo";
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
@@ -81,10 +95,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? { ...initialData, price: parseFloat(String(initialData?.price)) }
       : {
           name: "",
+          description: "",
           images: [],
+          videos: [],
           price: 0,
           categoryId: "",
-          colorId: "",
+          amenitiesId: "",
           sizeId: "",
           isFeatured: false,
           isArchived: false,
@@ -106,7 +122,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       router.push(`/${params.storeId}/products`);
       toast.success(toastMessage);
     } catch (error: any) {
-      toast.error("Something went wrong.");
+      toast.error("Đã xảy ra lỗi.");
     } finally {
       setLoading(false);
     }
@@ -118,9 +134,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
       router.push(`/${params.storeId}/products`);
-      toast.success("Product deleted.");
+      toast.success("Sản Phẩm đã bị xóa.");
     } catch (error: any) {
-      toast.error("Something went wrong.");
+      toast.error("Đã xảy ra lỗi.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -159,10 +175,34 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             name="images"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Images</FormLabel>
+                <FormLabel>Thêm Hình Ảnh</FormLabel>
                 <FormControl>
                   <ImageUpload
                     value={field.value.map((image) => image.url)}
+                    disabled={loading}
+                    onChange={(url) =>
+                      field.onChange([...field.value, { url }])
+                    }
+                    onRemove={(url) =>
+                      field.onChange([
+                        ...field.value.filter((current) => current.url !== url),
+                      ])
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="videos"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Thêm Videos</FormLabel>
+                <FormControl>
+                  <VideoUpload
+                    value={field.value.map((video) => video.url)}
                     disabled={loading}
                     onChange={(url) =>
                       field.onChange([...field.value, { url }])
@@ -184,11 +224,28 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Tên Sản Phẩm</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Product name"
+                      placeholder="tên sản phẩm..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mô Tả</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      disabled={loading}
+                      placeholder="mô tả về sản phẩm..."
                       {...field}
                     />
                   </FormControl>
@@ -201,7 +258,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price</FormLabel>
+                  <FormLabel>Giá</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -219,7 +276,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Thể Loại</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -230,7 +287,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Select a category"
+                          placeholder="Chọn Thể Loại"
                         />
                       </SelectTrigger>
                     </FormControl>
@@ -251,7 +308,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="sizeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Size</FormLabel>
+                  <FormLabel>Kích Thước</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -262,7 +319,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Select a size"
+                          placeholder="Chọn Kích Thước"
                         />
                       </SelectTrigger>
                     </FormControl>
@@ -280,10 +337,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="colorId"
+              name="amenitiesId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Color</FormLabel>
+                  <FormLabel>Loại Phòng Ngủ</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -294,14 +351,46 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Select a color"
+                          placeholder="Chọn loại phòng ngủ..."
                         />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {colors.map((color) => (
-                        <SelectItem key={color.id} value={color.id}>
-                          {color.name}
+                      {amenities.map((amenity) => (
+                        <SelectItem key={amenity.id} value={amenity.id}>
+                          {amenity.roomName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amenitiesId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Số Phòng Vệ Sinh</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Chọn số phòng vệ sinh..."
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {amenities.map((amenity) => (
+                        <SelectItem key={amenity.id} value={amenity.id}>
+                          {amenity.bathroomValue}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -323,9 +412,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Featured</FormLabel>
+                    <FormLabel>Đặc Sắc</FormLabel>
                     <FormDescription>
-                      This product will appear on the homepage.
+                      Sản phẩm này sẽ xuất hiện trên trang chủ.
                     </FormDescription>
                   </div>
                 </FormItem>
@@ -344,9 +433,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Archived</FormLabel>
+                    <FormLabel>Lưu Trữ</FormLabel>
                     <FormDescription>
-                      This product will not appear anywhere in the store.
+                      Sản phẩm này sẽ không xuất hiện ở bất cứ đâu trong cửa
+                      hàng.
                     </FormDescription>
                   </div>
                 </FormItem>

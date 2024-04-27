@@ -13,11 +13,13 @@ export async function POST(
 
     const {
       name,
+      description,
       price,
       categoryId,
-      colorId,
+      amenitiesId,
       sizeId,
       images,
+      videos,
       isFeatured,
       isArchived,
     } = body;
@@ -30,8 +32,16 @@ export async function POST(
       return new NextResponse("Name is required", { status: 400 });
     }
 
+    if (!description) {
+      return new NextResponse("Description is required", { status: 400 });
+    }
+
     if (!images || !images.length) {
       return new NextResponse("Images are required", { status: 400 });
+    }
+
+    if (!videos || !videos.length) {
+      return new NextResponse("Videos are required", { status: 400 });
     }
 
     if (!price) {
@@ -46,8 +56,8 @@ export async function POST(
       return new NextResponse("Size id is required", { status: 400 });
     }
 
-    if (!colorId) {
-      return new NextResponse("Color id is required", { status: 400 });
+    if (!amenitiesId) {
+      return new NextResponse("Amenities id is required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -68,16 +78,22 @@ export async function POST(
     const product = await prismadb.product.create({
       data: {
         name,
+        description,
         price,
         isArchived,
         isFeatured,
         categoryId,
         sizeId,
-        colorId,
+        amenitiesId,
         storeId: params.storeId,
         images: {
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
+          },
+        },
+        videos: {
+          createMany: {
+            data: [...videos.map((video: { url: string }) => video)],
           },
         },
       },
@@ -96,7 +112,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;
-    const colorId = searchParams.get("colorId") || undefined;
+    const amenitiesId = searchParams.get("amenitiesId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
     const isFeatured = searchParams.get("isFeatured");
 
@@ -108,15 +124,16 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        colorId,
+        amenitiesId,
         sizeId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
         images: true,
+        videos: true,
         category: true,
-        color: true,
+        amenities: true,
         size: true,
       },
       orderBy: {

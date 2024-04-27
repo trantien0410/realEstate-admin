@@ -56,7 +56,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
         ))}
       </div>
       <CldUploadWidget
-        onSuccess={onUpload}
+        onUpload={onUpload}
         uploadPreset="sr90gznv"
         options={{
           clientAllowedFormats: ["video"],

@@ -12,11 +12,13 @@ export async function PATCH(
 
     const {
       name,
+      description,
       price,
       categoryId,
-      colorId,
+      amenitiesId,
       sizeId,
       images,
+      videos,
       isFeatured,
       isArchived,
     } = body;
@@ -29,8 +31,16 @@ export async function PATCH(
       return new NextResponse("Name is required", { status: 400 });
     }
 
+    if (!description) {
+      return new NextResponse("Description is required", { status: 400 });
+    }
+
     if (!images || !images.length) {
       return new NextResponse("Images are required", { status: 400 });
+    }
+
+    if (!videos || !videos.length) {
+      return new NextResponse("Videos are required", { status: 400 });
     }
 
     if (!price) {
@@ -45,8 +55,8 @@ export async function PATCH(
       return new NextResponse("Size id is required", { status: 400 });
     }
 
-    if (!colorId) {
-      return new NextResponse("Color id is required", { status: 400 });
+    if (!amenitiesId) {
+      return new NextResponse("Amenities id is required", { status: 400 });
     }
 
     if (!params.productId) {
@@ -70,11 +80,15 @@ export async function PATCH(
       },
       data: {
         name,
+        description,
         price,
         categoryId,
         sizeId,
-        colorId,
+        amenitiesId,
         images: {
+          deleteMany: {},
+        },
+        videos: {
           deleteMany: {},
         },
         isArchived,
@@ -90,6 +104,11 @@ export async function PATCH(
         images: {
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
+          },
+        },
+        videos: {
+          createMany: {
+            data: [...videos.map((video: { url: string }) => video)],
           },
         },
       },
@@ -117,7 +136,8 @@ export async function GET(
       },
       include: {
         images: true,
-        color: true,
+        videos: true,
+        amenities: true,
         category: true,
         size: true,
       },

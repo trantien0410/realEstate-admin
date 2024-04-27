@@ -6,10 +6,12 @@ import { CellAction } from "./cell-action";
 export type ProductColumn = {
   id: string;
   name: string;
+  description: string;
   price: string;
   size: string;
   category: string;
-  color: string;
+  roomName: string;
+  bathroomValue: number;
   isFeatured: boolean;
   isArchived: boolean;
   createdAt: string;
@@ -18,48 +20,43 @@ export type ProductColumn = {
 export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Tên Sản Phẩm",
+  },
+  {
+    accessorKey: "description",
+    header: "Mô Tả",
   },
   {
     accessorKey: "isArchived",
-    header: "Archived",
+    header: "Đã Lưu Trữ",
   },
   {
     accessorKey: "isFeatured",
-    header: "Featured",
+    header: "Đặc Sắc",
   },
   {
     accessorKey: "price",
-    header: "Price",
+    header: "Giá",
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: "Thể Loại",
   },
   {
     accessorKey: "size",
-    header: "Size",
+    header: "Kích Thước",
   },
   {
-    accessorKey: "color",
-    header: "Color",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-x-2">
-        {row.original.color}
-        <div
-          className="h-6 w-6 rounded-full border"
-          style={{ backgroundColor: row.original.color }}
-        />
-      </div>
-    ),
+    accessorKey: "roomName",
+    header: "Loại Phòng Ngủ",
   },
   {
-    accessorKey: "category",
-    header: "Category",
+    accessorKey: "bathroomValue",
+    header: "Số Phòng Vệ Sinh",
   },
   {
     accessorKey: "createdAt",
-    header: "Date",
+    header: "Ngày Tạo",
   },
   {
     id: "actions",
