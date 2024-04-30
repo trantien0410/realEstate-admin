@@ -46,8 +46,10 @@ import { Textarea } from "@/components/ui/textarea";
 const formSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
-  images: z.object({ url: z.string() }).array(),
-  videos: z.object({ url: z.string() }).array(),
+  phoneContact: z.string().min(1),
+  address: z.string().min(1),
+  images: z.object({ url: z.string() }).array().optional(),
+  videos: z.object({ url: z.string() }).array().optional(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
   amenitiesId: z.string().min(1),
@@ -96,6 +98,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       : {
           name: "",
           description: "",
+          phoneContact: "",
+          address: "",
           images: [],
           videos: [],
           price: 0,
@@ -110,13 +114,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+      const formData = {
+        ...data,
+        images: data.images?.length ? data.images : [],
+        videos: data.videos?.length ? data.videos : [],
+      };
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/products/${params.productId}`,
-          data
+          formData
         );
       } else {
-        await axios.post(`/api/${params.storeId}/products`, data);
+        await axios.post(`/api/${params.storeId}/products`, formData);
       }
       router.refresh();
       router.push(`/${params.storeId}/products`);
@@ -178,14 +187,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormLabel>Thêm Hình Ảnh</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value.map((image) => image.url)}
+                    value={field.value?.map((image) => image.url) || []}
                     disabled={loading}
                     onChange={(url) =>
-                      field.onChange([...field.value, { url }])
+                      field.onChange([...(field.value || []), { url }])
                     }
                     onRemove={(url) =>
                       field.onChange([
-                        ...field.value.filter((current) => current.url !== url),
+                        ...(field.value || []).filter(
+                          (current) => current.url !== url
+                        ),
                       ])
                     }
                   />
@@ -194,6 +205,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="videos"
@@ -202,14 +214,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormLabel>Thêm Videos</FormLabel>
                 <FormControl>
                   <VideoUpload
-                    value={field.value.map((video) => video.url)}
+                    value={field.value?.map((video) => video.url) || []}
                     disabled={loading}
                     onChange={(url) =>
-                      field.onChange([...field.value, { url }])
+                      field.onChange([...(field.value || []), { url }])
                     }
                     onRemove={(url) =>
                       field.onChange([
-                        ...field.value.filter((current) => current.url !== url),
+                        ...(field.value || []).filter(
+                          (current) => current.url !== url
+                        ),
                       ])
                     }
                   />
@@ -246,6 +260,40 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <Textarea
                       disabled={loading}
                       placeholder="mô tả về sản phẩm..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phoneContact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Số Liên Hệ</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="0123456789...."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Địa Chỉ</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="abc, đường d3,...."
                       {...field}
                     />
                   </FormControl>

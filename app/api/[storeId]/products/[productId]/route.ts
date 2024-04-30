@@ -13,6 +13,8 @@ export async function PATCH(
     const {
       name,
       description,
+      phoneContact,
+      address,
       price,
       categoryId,
       amenitiesId,
@@ -35,12 +37,16 @@ export async function PATCH(
       return new NextResponse("Description is required", { status: 400 });
     }
 
-    if (!images || !images.length) {
-      return new NextResponse("Images are required", { status: 400 });
+    if (!phoneContact) {
+      return new NextResponse("Phone Contact is required", { status: 400 });
     }
 
-    if (!videos || !videos.length) {
-      return new NextResponse("Videos are required", { status: 400 });
+    if (!address) {
+      return new NextResponse("Address is required", { status: 400 });
+    }
+
+    if ((!images || !images.length) && (!videos || !videos.length)) {
+      return new NextResponse("Medias are required", { status: 400 });
     }
 
     if (!price) {
@@ -81,6 +87,8 @@ export async function PATCH(
       data: {
         name,
         description,
+        phoneContact,
+        address,
         price,
         categoryId,
         sizeId,
@@ -103,12 +111,18 @@ export async function PATCH(
       data: {
         images: {
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data:
+              images && images.length > 0
+                ? images.map((image: { url: string }) => ({ url: image.url }))
+                : [],
           },
         },
         videos: {
           createMany: {
-            data: [...videos.map((video: { url: string }) => video)],
+            data:
+              videos && videos.length > 0
+                ? videos.map((video: { url: string }) => ({ url: video.url }))
+                : [],
           },
         },
       },

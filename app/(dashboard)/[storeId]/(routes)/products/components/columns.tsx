@@ -7,6 +7,8 @@ export type ProductColumn = {
   id: string;
   name: string;
   description: string;
+  phoneContact: string;
+  address: string;
   price: string;
   size: string;
   category: string;
@@ -25,6 +27,14 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "description",
     header: "Mô Tả",
+  },
+  {
+    accessorKey: "phoneContact",
+    header: "Liên Hệ",
+  },
+  {
+    accessorKey: "address",
+    header: "Địa Chỉ",
   },
   {
     accessorKey: "isArchived",

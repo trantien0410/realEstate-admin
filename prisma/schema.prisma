@@ -82,24 +82,26 @@ model Amenities {
 }
 
 model Product {
-  id          String    @id @default(uuid())
-  storeId     String
-  stores      Store     @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId  String
-  category    Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name        String
-  description String    @db.Text
-  price       Decimal
-  isFeatured  Boolean   @default(false)
-  isArchived  Boolean   @default(false)
-  sizeId      String
-  size        Size      @relation(fields: [sizeId], references: [id])
-  amenitiesId String
-  amenities   Amenities @relation(fields: [amenitiesId], references: [id])
-  images      Image[]
-  videos      Video[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  storeId      String
+  stores       Store     @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId   String
+  category     Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name         String
+  description  String    @db.Text
+  phoneContact String
+  address      String
+  price        Decimal
+  isFeatured   Boolean   @default(false)
+  isArchived   Boolean   @default(false)
+  sizeId       String
+  size         Size      @relation(fields: [sizeId], references: [id])
+  amenitiesId  String
+  amenities    Amenities @relation(fields: [amenitiesId], references: [id])
+  images       Image[]
+  videos       Video[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([storeId])
   @@index([categoryId])
