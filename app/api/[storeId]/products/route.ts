@@ -17,6 +17,7 @@ export async function POST(
       phoneContact,
       address,
       price,
+      billboardId,
       categoryId,
       amenitiesId,
       sizeId,
@@ -58,6 +59,10 @@ export async function POST(
       return new NextResponse("Category id is required", { status: 400 });
     }
 
+    if (!billboardId) {
+      return new NextResponse("Billboard id is required", { status: 400 });
+    }
+
     if (!sizeId) {
       return new NextResponse("Size id is required", { status: 400 });
     }
@@ -90,6 +95,7 @@ export async function POST(
         price,
         isArchived,
         isFeatured,
+        billboardId,
         categoryId,
         sizeId,
         amenitiesId,
@@ -125,6 +131,7 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(req.url);
+    const billboardId = searchParams.get("billboardId") || undefined;
     const categoryId = searchParams.get("categoryId") || undefined;
     const amenitiesId = searchParams.get("amenitiesId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
@@ -137,6 +144,7 @@ export async function GET(
     const products = await prismadb.product.findMany({
       where: {
         storeId: params.storeId,
+        billboardId,
         categoryId,
         amenitiesId,
         sizeId,
@@ -147,6 +155,7 @@ export async function GET(
         images: true,
         videos: true,
         category: true,
+        billboard: true,
         amenities: true,
         size: true,
       },

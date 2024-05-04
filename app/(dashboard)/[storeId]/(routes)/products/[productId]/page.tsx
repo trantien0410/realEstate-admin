@@ -16,6 +16,11 @@ const ProductPage = async ({
       videos: true,
     },
   });
+  const billboards = await prismadb.billboard.findMany({
+    where: {
+      storeId: params.storeId,
+    },
+  });
   const categories = await prismadb.category.findMany({
     where: {
       storeId: params.storeId,
@@ -36,6 +41,7 @@ const ProductPage = async ({
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <ProductForm
+          billboards={billboards}
           categories={categories}
           amenities={amenities}
           sizes={sizes}

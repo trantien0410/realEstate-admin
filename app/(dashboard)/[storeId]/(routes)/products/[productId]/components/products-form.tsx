@@ -2,13 +2,14 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { Trash } from "lucide-react";
 import {
   Amenities,
+  Billboard,
   Category,
   Image,
   Product,
@@ -52,6 +53,7 @@ const formSchema = z.object({
   videos: z.object({ url: z.string() }).array().optional(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
+  billboardId: z.string().min(1),
   amenitiesId: z.string().min(1),
   sizeId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
@@ -67,6 +69,7 @@ interface ProductFormProps {
         videos: Video[];
       })
     | null;
+  billboards: Billboard[];
   categories: Category[];
   amenities: Amenities[];
   sizes: Size[];
@@ -74,6 +77,7 @@ interface ProductFormProps {
 
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
+  billboards,
   categories,
   sizes,
   amenities,
@@ -83,6 +87,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
 
   const title = initialData ? "Sửa Sản Phẩm" : "Tạo Mới Sản Phẩm";
   const description = initialData ? "Sửa 1 Sản Phẩm" : "Tạo Mới 1 Sản Phẩm";
@@ -103,6 +108,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           images: [],
           videos: [],
           price: 0,
+          billboardId: "",
           categoryId: "",
           amenitiesId: "",
           sizeId: "",
@@ -110,6 +116,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isArchived: false,
         },
   });
+
+  // Extract the watched value to a variable outside of useEffect
+  const watchedBillboardId = form.watch("billboardId");
+
+  // Update filtered categories when billboardId changes
+  useEffect(() => {
+    if (watchedBillboardId) {
+      const relatedCategories = categories.filter(
+        (category) => category.billboardId === watchedBillboardId
+      );
+      setFilteredCategories(relatedCategories);
+    } else {
+      setFilteredCategories([]);
+    }
+  }, [watchedBillboardId, categories]); // Include all necessary dependencies
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
@@ -303,18 +324,35 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="price"
+              name="billboardId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Giá</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      disabled={loading}
-                      placeholder="9.99"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Dự Án</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("categoryId", ""); // Reset category when billboard changes
+                    }}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Chọn Dự Án"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {billboards.map((billboard) => (
+                        <SelectItem key={billboard.id} value={billboard.id}>
+                          {billboard.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -326,7 +364,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Thể Loại</FormLabel>
                   <Select
-                    disabled={loading}
+                    disabled={loading || filteredCategories.length === 0}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
@@ -340,7 +378,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
+                      {filteredCategories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -443,6 +481,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Giá Tiền</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      placeholder="9.99"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

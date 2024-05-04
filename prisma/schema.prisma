@@ -32,6 +32,7 @@ model Billboard {
   imageUrl   String?
   videoUrl   String?
   categories Category[]
+  products   Product[]  @relation("BillboardToProduct")
   createdAt  DateTime   @default(now())
   updateAt   DateTime   @updatedAt
 
@@ -87,6 +88,8 @@ model Product {
   stores       Store     @relation("StoreToProduct", fields: [storeId], references: [id])
   categoryId   String
   category     Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  billboardId  String
+  billboard    Billboard @relation("BillboardToProduct", fields: [billboardId], references: [id])
   name         String
   description  String    @db.Text
   phoneContact String
@@ -105,6 +108,7 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
+  @@index([billboardId])
   @@index([sizeId])
   @@index([amenitiesId])
 }

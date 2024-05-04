@@ -65,6 +65,9 @@ export async function GET(
       where: {
         storeId: params.storeId,
       },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
     return NextResponse.json(billboards);
   } catch (error) {

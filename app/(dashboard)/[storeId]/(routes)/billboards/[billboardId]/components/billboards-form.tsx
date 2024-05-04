@@ -186,11 +186,11 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
               name="label"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nhản hiệu</FormLabel>
+                  <FormLabel>Nhãn Hiệu</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Nhản hiệu dự án"
+                      placeholder="Nhãn Hiệu dự án"
                       {...field}
                     />
                   </FormControl>

@@ -56,6 +56,9 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
+    const { searchParams } = new URL(req.url);
+    const billboardId = searchParams.get("billboardId") || undefined;
+
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
@@ -63,6 +66,13 @@ export async function GET(
     const categories = await prismadb.category.findMany({
       where: {
         storeId: params.storeId,
+        billboardId,
+      },
+      include: {
+        billboard: true,
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
     return NextResponse.json(categories);

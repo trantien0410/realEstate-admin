@@ -16,6 +16,7 @@ export async function PATCH(
       phoneContact,
       address,
       price,
+      billboardId,
       categoryId,
       amenitiesId,
       sizeId,
@@ -51,6 +52,10 @@ export async function PATCH(
 
     if (!price) {
       return new NextResponse("Price is required", { status: 400 });
+    }
+
+    if (!billboardId) {
+      return new NextResponse("Billboard id is required", { status: 400 });
     }
 
     if (!categoryId) {
@@ -90,6 +95,7 @@ export async function PATCH(
         phoneContact,
         address,
         price,
+        billboardId,
         categoryId,
         sizeId,
         amenitiesId,
@@ -151,6 +157,7 @@ export async function GET(
       include: {
         images: true,
         videos: true,
+        billboard: true,
         amenities: true,
         category: true,
         size: true,
