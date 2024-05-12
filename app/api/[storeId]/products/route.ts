@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 
 import prismadb from "@/lib/prismadb";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
@@ -135,7 +141,18 @@ export async function GET(
     const categoryId = searchParams.get("categoryId") || undefined;
     const amenitiesId = searchParams.get("amenitiesId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
-    const isFeatured = searchParams.get("isFeatured");
+    const isFeatured = searchParams.get("isFeatured") || undefined;
+    const minPrice = searchParams.get("minPrice") || undefined;
+    const maxPrice = searchParams.get("maxPrice") || undefined;
+
+    let price: { gte: number; lte: number } | undefined;
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      price = {
+        gte: +minPrice,
+        lte: +maxPrice,
+      };
+    }
 
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -150,6 +167,7 @@ export async function GET(
         sizeId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
+        ...(price && { price }),
       },
       include: {
         images: true,
@@ -159,11 +177,11 @@ export async function GET(
         amenities: true,
         size: true,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: minPrice && maxPrice ? { price: "asc" } : { createdAt: "desc" },
     });
-    return NextResponse.json(products);
+    return NextResponse.json(products, {
+      headers: corsHeaders,
+    });
   } catch (error) {
     console.log("[PRODUCTS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
