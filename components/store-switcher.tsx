@@ -79,7 +79,7 @@ export default function StoreSwitcher({
           <CommandList>
             <CommandInput placeholder="Tìm kiếm..." />
             <CommandEmpty>Không Tìm thấy cửa hàng nào</CommandEmpty>
-            <CommandGroup heading="Store">
+            <CommandGroup heading="Cửa hàng">
               {formattedItems.map((store) => (
                 <CommandItem
                   key={store.value}
